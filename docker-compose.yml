@@ -1,0 +1,70 @@
+version: '3.9'
+
+services:
+
+  service-registry:
+    build: ./service-registry
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+    networks:
+      - banking-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - service-registry
+    networks:
+      - banking-net
+
+  account-service:
+    build: ./account-service
+    container_name: account-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - service-registry
+      - mongodb
+    networks:
+      - banking-net
+
+  transaction-service:
+    build: ./transaction-service
+    container_name: transaction-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - service-registry
+      - mongodb
+    networks:
+      - banking-net
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - service-registry
+    networks:
+      - banking-net
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - banking-net
+    volumes:
+      - mongo-data:/data/db
+
+networks:
+  banking-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
